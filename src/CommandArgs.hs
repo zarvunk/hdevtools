@@ -37,6 +37,7 @@ data HDevTools
         , ghcOpts :: [String]
         , start_server :: Bool
         , cabalOpts :: [String]
+        , no_configure :: Bool
         , noDaemon     :: Bool
         , status       :: Bool
         , stop_server  :: Bool
@@ -46,6 +47,7 @@ data HDevTools
         { socket  :: Maybe FilePath
         , ghcOpts :: [String]
         , cabalOpts :: [String]
+        , no_configure :: Bool
         , path    :: Maybe String
         , file    :: String
         , json    :: Bool
@@ -56,6 +58,7 @@ data HDevTools
         { socket  :: Maybe FilePath
         , ghcOpts :: [String]
         , cabalOpts :: [String]
+        , no_configure :: Bool
         , module_ :: String
         , debug :: Bool
         }
@@ -63,6 +66,7 @@ data HDevTools
         { socket     :: Maybe FilePath
         , ghcOpts    :: [String]
         , cabalOpts  :: [String]
+        , no_configure :: Bool
         , path       :: Maybe String
         , file       :: String
         , identifier :: String
@@ -73,6 +77,7 @@ data HDevTools
         { socket  :: Maybe FilePath
         , ghcOpts :: [String]
         , cabalOpts  :: [String]
+        , no_configure :: Bool
         , path    :: Maybe String
         , file    :: String
         , line    :: Int
@@ -84,6 +89,7 @@ data HDevTools
         { socket :: Maybe FilePath
         , ghcOpts :: [String]
         , cabalOpts :: [String]
+        , no_configure :: Bool
         , symbol :: String
         , files :: [String]
         , debug :: Bool
@@ -96,6 +102,7 @@ dummyAdmin = Admin
     { socket       = Nothing
     , ghcOpts = []
     , cabalOpts = []
+    , no_configure = False
     , start_server = False
     , noDaemon     = False
     , status       = False
@@ -108,6 +115,7 @@ dummyCheck = Check
     { socket  = Nothing
     , ghcOpts = []
     , cabalOpts = []
+    , no_configure = False
     , path    = Nothing
     , file    = ""
     , json    = False
@@ -120,6 +128,7 @@ dummyModuleFile = ModuleFile
     { socket  = Nothing
     , ghcOpts = []
     , cabalOpts = []
+    , no_configure = False
     , module_ = ""
     , debug = False
     }
@@ -129,6 +138,7 @@ dummyInfo = Info
     { socket     = Nothing
     , ghcOpts    = []
     , cabalOpts = []
+    , no_configure = False
     , path       = Nothing
     , file       = ""
     , identifier = ""
@@ -141,6 +151,7 @@ dummyType = Type
     { socket  = Nothing
     , ghcOpts = []
     , cabalOpts = []
+    , no_configure = False
     , path    = Nothing
     , file    = ""
     , line    = 0
@@ -154,6 +165,7 @@ dummyFindSymbol = FindSymbol
     { socket = Nothing
     , ghcOpts = []
     , cabalOpts = []
+    , no_configure = False
     , symbol = ""
     , files = []
     , debug = False
@@ -165,6 +177,7 @@ admin = record dummyAdmin
     [ socket       := def += typFile += help "socket file to use"
     , ghcOpts  := def += typ "OPTION" += help "ghc options"
     , cabalOpts := def += typ "OPTION"  += help "cabal options"
+    , no_configure := def        += help "do not do cabal configuration step"
     , start_server := def            += help "start server"
     , noDaemon     := def            += help "do not daemonize (only if --start-server)"
     , status       := def            += help "show status of server"
@@ -177,6 +190,7 @@ check = record dummyCheck
     [ socket   := def += typFile      += help "socket file to use"
     , ghcOpts  := def += typ "OPTION" += help "ghc options"
     , cabalOpts := def += typ "OPTION"  += help "cabal options"
+    , no_configure  := def        += help "do not do cabal configuration step"
     , path     := def += typFile      += help "path to target file"
     , file     := def += typFile      += argPos 0 += opt ""
     , json     := def                 += help "render output as JSON"
@@ -189,6 +203,7 @@ moduleFile = record dummyModuleFile
     [ socket   := def += typFile += help "socket file to use"
     , ghcOpts  := def += typ "OPTION" += help "ghc options"
     , cabalOpts := def += typ "OPTION"  += help "cabal options"
+    , no_configure  := def        += help "do not do cabal configuration step"
     , module_  := def += typ "MODULE" += argPos 0
     , debug    := def                 += help "enable debug output"
     ] += help "Get the haskell source file corresponding to a module name"
@@ -198,6 +213,7 @@ info = record dummyInfo
     [ socket     := def += typFile      += help "socket file to use"
     , ghcOpts    := def += typ "OPTION" += help "ghc options"
     , cabalOpts := def += typ "OPTION"  += help "cabal options"
+    , no_configure  := def        += help "do not do cabal configuration step"
     , path       := def += typFile      += help "path to target file"
     , file       := def += typFile      += argPos 0 += opt ""
     , identifier := def += typ "IDENTIFIER" += argPos 1
@@ -210,6 +226,7 @@ type_ = record dummyType
     [ socket   := def += typFile += help "socket file to use"
     , ghcOpts  := def += typ "OPTION" += help "ghc options"
     , cabalOpts := def += typ "OPTION"  += help "cabal options"
+    , no_configure := def        += help "do not do cabal configuration step"
     , debug    := def                 += help "enable debug output"
     , path     := def += typFile      += help "path to target file"
     , file     := def += typFile      += argPos 0 += opt ""
@@ -223,6 +240,7 @@ findSymbol = record dummyFindSymbol
     [ socket   := def += typFile += help "socket file to use"
     , ghcOpts  := def += typ "OPTION" += help "ghc options"
     , cabalOpts := def += typ "OPTION"  += help "cabal options"
+    , no_configure := def        += help "do not do cabal configuration step"
     , symbol   := def += typ "SYMBOL" += argPos 0
     , files    := def += typFile += args
     , debug    := def                 += help "enable debug output"

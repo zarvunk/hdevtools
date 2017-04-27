@@ -58,7 +58,10 @@ main = do
     args <- loadHDevTools
     let argPath = pathArg args
     dir  <- maybe getCurrentDirectory (return . takeDirectory) argPath
-    mCabalFile <- findCabalFile dir >>= traverse absoluteFilePath
+    mCabalFile <-
+        if no_configure args
+           then return Nothing
+           else findCabalFile dir >>= traverse absoluteFilePath
     when (debug args) .
       putStrLn $ "Cabal file: " <> show mCabalFile
     mStackYaml <- findStackYaml dir
