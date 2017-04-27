@@ -199,17 +199,24 @@ withTargets :: ClientSend -> [FilePath] -> Config -> GHC.Ghc () -> GHC.Ghc ()
 withTargets clientSend files conf act = do
     ret <- loadTarget files conf
     case ret of
-        Nothing -> liftIO $ mapM_ clientSend [ClientStderr "Template haskell required but not activated", ClientExit (ExitFailure 1)]
-
-        Just GHC.Failed -> liftIO $ mapM_ clientSend [ClientStderr "Failed to load targets", ClientExit (ExitFailure 1)]
-
-        Just GHC.Succeeded -> act
-
+        Nothing ->
+            liftIO $ mapM_ clientSend 
+                [ ClientStderr "Template haskell required but not activated"
+                , ClientExit (ExitFailure 1)
+                ]
+        Just GHC.Failed ->
+            liftIO $ mapM_ clientSend
+                [ ClientStderr "Failed to load targets"
+                , ClientExit (ExitFailure 1)
+                ]
+        Just GHC.Succeeded ->
+            act
 
 runCommand :: IORef State -> ClientSend -> Config -> Command -> GHC.Ghc ()
 runCommand _ clientSend conf (CmdCheck file) =
     withTargets clientSend [file] conf
         (liftIO . clientSend . ClientExit $ ExitSuccess)
+
 runCommand _ clientSend _ (CmdModuleFile moduleName) = do
     moduleGraph <- GHC.getModuleGraph
     case find (moduleSummaryMatchesModuleName moduleName) moduleGraph of
@@ -233,8 +240,9 @@ runCommand _ clientSend _ (CmdModuleFile moduleName) = do
     where
     moduleSummaryMatchesModuleName modName modSummary =
         modName == (GHC.moduleNameString . GHC.moduleName . GHC.ms_mod) modSummary
+
 runCommand state clientSend conf (CmdInfo file identifier) =
-    withTargets clientSend  [file] conf $ do
+    withTargets clientSend [file] conf $ do
         result <- withWarnings state False $
             getIdentifierInfo file identifier
         case result of
@@ -247,6 +255,7 @@ runCommand state clientSend conf (CmdInfo file identifier) =
                 [ ClientStdout info
                 , ClientExit ExitSuccess
                 ]
+
 runCommand state clientSend conf (CmdType file (line, col)) =
     withTargets clientSend [file] conf $ do
         result <- withWarnings state False $
@@ -270,6 +279,7 @@ runCommand state clientSend conf (CmdType file (line, col)) =
                 , show endCol , " "
                 , "\"", t, "\""
                 ]
+
 runCommand state clientSend conf (CmdFindSymbol symbol files) = do
     -- for the findsymbol command GHC shouldn't output any warnings
     -- or errors to stdout for the loaded source files, we're only
@@ -281,7 +291,6 @@ runCommand state clientSend conf (CmdFindSymbol symbol files) = do
 #else
                                                  return () }
 #endif
-
     ret <- withTargets clientSend files conf $ do
         result <- withWarnings state False $ findSymbol symbol
         case result of
